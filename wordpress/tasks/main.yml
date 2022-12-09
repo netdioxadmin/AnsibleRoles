@@ -1,0 +1,35 @@
+---
+# Downloading Wordpress
+  - name: Download Wordpress
+    get_url:
+      url: "{{ wp_url }}"
+      dest: /tmp/wordpress.zip
+    tags:
+      - wordpress
+# Unzipping Wordpress Files
+  - name: unzip wordpress file
+    unarchive:
+      src: /tmp/wordpress.zip
+      dest: /tmp/
+      remote_src: true
+    tags:
+     - wordpress
+# Copy Wordpress Files to Document Root
+  - name: copy wordpress file to document root {{domain_name}}
+    copy:
+      src: /tmp/wordpress/
+      dest: /var/www/html/{{domain_name}}
+      owner: "{{httpd_user}}"
+      group: "{{httpd_user}}"
+      remote_src: true
+    tags:
+          rdpress
+# Config Wp _Config  To Accomadate Database in Config File
+  - name: Config wp-config to Accomadate Database
+    template:
+      src: ./wp-config-sample.php
+      dest: /var/www/html/{{domain_name}}/wp-config.php
+      owner: "{{httpd_user}}"
+      group: "{{httpd_user}}"
+    tags:
+      - wordpress

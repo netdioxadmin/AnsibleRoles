@@ -1,0 +1,12 @@
+---
+- name: "restart-apache"
+  service:
+    name: httpd
+    state: restarted
+    enabled: true
+        
+- name: "restart-php"
+  service:
+    name: php-fpm
+    state: restarted
+    enabled: true

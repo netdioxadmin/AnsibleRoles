@@ -1,0 +1,8 @@
+---
+  - name: Installing Lamp Stack and Wordpress
+    become: true
+    hosts: amazon
+    roles:
+     - lamp
+     - drupal
+    

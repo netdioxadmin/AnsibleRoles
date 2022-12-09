@@ -1,0 +1,7 @@
+---
+  domain_name: site.samv.tech
+  httpd_user: apache
+  wp_url: https://wordpress.org/wordpress-6.1.1.zip
+  common_database: commondb
+  common_user: commonuser
+  common_password: commonpass123

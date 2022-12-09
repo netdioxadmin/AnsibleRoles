@@ -1,0 +1,152 @@
+---
+# Installaing Packages in Amazon Linux
+- name : Installing Packages in Amazon Linux
+  yum:
+    name: "{{ amazon_packages }}"
+    state: present
+    update_cache: true
+  tags:
+    - lamp
+# Installing PHP
+- name: Install php In Amazon linux
+  shell: amazon-linux-extras install php7.4 -y
+  notify:
+    - "restart-apache"
+    - "restart-php"
+  tags:
+    - lamp
+# Creating Httpd-Config
+- name: Creating Httpd confing in Amazon Linux
+  template:
+    src: httpd.conf
+    dest: /etc/httpd/conf/httpd.conf
+  register: conf_status
+  tags:
+      - lamp
+# Restarting Httpd-Service
+- name: Restart Httpd service
+  service:
+    name: "{{item}}"
+    state: restarted
+  with_items:
+       - httpd
+       - php-fpm
+  tags:
+      - lamp
+# Creating Document Root for Wordpress
+- name: Create virtual Document Root {{domain_name}}
+  file:
+    path: /var/www/html/{{domain_name}}
+    state: directory
+    owner: "{{httpd_user}}"
+    group: "{{httpd_user}}"
+  tags:
+    - lamp
+# Creating Document Root and Testing files upload
+- name: Creating Document Root and Testing files upload {{domain_name}}
+  copy:
+    src: "{{item}}"
+    dest: /var/www/html/{{domain_name}}
+    owner: "{{httpd_user}}"
+    group: "{{httpd_user}}"
+  with_items:
+      - test.php
+      - index.html
+  tags:
+      - lamp 
+# MYSql Task Start here
+# Restarting MariaDB
+- name: Restarting Mariadb In Amazon Linux
+  service:
+    name: mariadb
+    state: started
+  tags:
+    - lamp
+# Installing Python Module for Mysql
+- name: Installing Pip Module
+  pip:
+    name: MySQL-python
+    state: present
+  tags:
+    - lamp
+# Creating My.cnf
+- name: creating mycnf for Mariadb
+  template:
+    src: mycnfsample
+    dest: /root/.my.cnf
+  tags:
+    - lamp
+ # Setting Root Password
+- name: Setting Root password
+  mysql_user:
+    check_implicit_admin: yes
+    config_file: /root/.my.cnf
+    host_all: true
+    user: root
+    password: "{{ mysqlrootpass }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
+  tags:
+     - lamp
+# Removing Anonymous User
+- name: "Mariadbd-Server - Removing Anonymous user"
+  mysql_user:
+    user: ""
+    host_all: true
+    state: absent
+  tags:
+    - lamp
+# Removing Test Database
+- name: "Removing Test database"
+  mysql_db:
+    name: "test"
+    state: absent
+  tags:
+    - lamp
+# Creating Vurtual Host Config For Domain
+- name: Creating Virtualhost Config
+  template:
+    src: vhostsample.conf
+    dest: /etc/httpd/conf.d/default.conf
+  tags:
+    - lamp
+
+# Creating Database
+- name: Create a Database 
+  mysql_db:
+    name: "{{ common_database }}"
+    state: present
+  tags:
+     - lamp
+# Creat Database User for DB and Grant Privileges
+- name: create a Database user
+  mysql_user:
+     user: "{{ common_user }}"
+     host: "%"
+     password: "{{ common_password }}"
+     priv: '{{ common_database }}.*:ALL'
+     state: present
+  tags:
+    - lamp
+# Checking Httpd Syntax
+- name: Httpd Config check
+  shell: apachectl -t
+  register: amazonsyntaxcheck_status
+  tags:
+    - lamp
+# Printing Http Configcheck  Status
+- name: Print Debug Output
+  debug:
+    var: amazonsyntaxcheck_status
+  tags:
+    - lamp
+# Restart If Syntax is okay
+- name: Restart httpd if syntax is okay
+  service:
+    name: "{{item}}"
+    state: restarted
+    enabled: true
+  with_items:
+    - httpd
+    - php-fpm.service
+  tags:
+    - lamp

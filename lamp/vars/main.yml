@@ -1,0 +1,19 @@
+---
+  amazon_packages:
+   - httpd
+   - mariadb-server
+   - python-pip
+   - MySQL-python
+   - php-dom
+   - php-gd
+   - php-xml
+   - php-mbstring
+  httpd_port: 80
+  domain_name: site.samv.tech
+  httpd_user: apache
+  mysqlrootpass: mysqlroot123
+  wp_url: https://wordpress.org/wordpress-6.1.1.zip
+  drupal_url: https://www.drupal.org/download-latest/zip
+  common_database: commondb
+  common_user: commonuser
+  common_password: commonpass123

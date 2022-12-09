@@ -1,0 +1,27 @@
+---
+
+# Downloading Drupal- name: Download drupal
+- name: Download Drupal
+  get_url:
+    url: "{{ drupal_url }}"
+    dest: /tmp/drupal.zip
+  tags:
+    - drupal
+# Unzipping Drupal Files
+- name: unzip drupal file
+  unarchive:
+    src: /tmp/drupal.zip
+    dest: /tmp/
+    remote_src: true
+  tags:
+    - drupal
+# Copy Drupal Files to Document Root
+- name: Copy drupal file to Document root {{drupal_domain_name}}
+  copy:
+    src: /tmp/drupal-9.4.9/
+    dest: /var/www/html/{{drupal_domain_name}}
+    owner: "{{httpd_user}}"
+    group: "{{httpd_user}}"
+    remote_src: true
+  tags:
+    - drupal
